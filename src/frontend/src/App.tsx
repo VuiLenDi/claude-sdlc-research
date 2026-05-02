@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './store/authStore';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import ProfilePage from './pages/ProfilePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,9 +22,12 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : <>{children}</>;
 }
 
-// Placeholder pages — implemented in Sprint 01 Day 2 and onwards
-const DashboardPage = () => <div className="p-8 text-gray-700">Dashboard — Sprint 01 Day 2</div>;
-const NotFoundPage = () => <div className="p-8 text-gray-700">404 — Page not found</div>;
+const ProjectPage = () => (
+  <div className="p-8 text-gray-700">Project detail — Sprint 03</div>
+);
+const NotFoundPage = () => (
+  <div className="p-8 text-gray-700">404 — Page not found</div>
+);
 
 export default function App() {
   return (
@@ -30,17 +35,19 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route
-            path="/login"
-            element={<PublicRoute><LoginPage /></PublicRoute>}
-          />
-          <Route
-            path="/register"
-            element={<PublicRoute><RegisterPage /></PublicRoute>}
-          />
+          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+          <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
           <Route
             path="/dashboard"
             element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
+          />
+          <Route
+            path="/profile"
+            element={<ProtectedRoute><ProfilePage /></ProtectedRoute>}
+          />
+          <Route
+            path="/projects/:id"
+            element={<ProtectedRoute><ProjectPage /></ProtectedRoute>}
           />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
