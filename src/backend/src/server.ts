@@ -7,6 +7,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 
 import authRoutes from './routes/auth';
+import projectRoutes from './routes/projects';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -28,14 +29,17 @@ const authLimiter = rateLimit({
 });
 
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/projects', projectRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 app.use(errorHandler);
 
 const PORT = parseInt(process.env.PORT ?? '8080', 10);
-app.listen(PORT, () => {
-  console.log(`TaskFlow API running on :${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`TaskFlow API running on :${PORT}`);
+  });
+}
 
 export default app;
