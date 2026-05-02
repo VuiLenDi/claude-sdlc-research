@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: taskflow
+      POSTGRES_PASSWORD: taskflow
+      POSTGRES_DB: taskflow_test
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U taskflow']
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  backend-test:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile.test
+    environment:
+      DATABASE_URL: postgresql://taskflow:taskflow@postgres-test:5432/taskflow_test
+      JWT_SECRET: test-jwt-secret-minimum-32-characters
+      JWT_REFRESH_SECRET: test-refresh-secret-minimum-32-chars
+      NODE_ENV: test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    command: >
+      sh -c "npx prisma db push --accept-data-loss && npm test -- --coverage --forceExit"
+
+  frontend-test:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile.test
+    environment:
+      CI: true

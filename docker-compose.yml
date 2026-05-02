@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: taskflow
+      POSTGRES_PASSWORD: taskflow
+      POSTGRES_DB: taskflow_dev
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U taskflow']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile.test
+    command: >
+      sh -c "npx prisma db push --accept-data-loss && npm run dev"
+    environment:
+      DATABASE_URL: postgresql://taskflow:taskflow@postgres:5432/taskflow_dev
+      JWT_SECRET: dev-jwt-secret-change-in-prod
+      JWT_REFRESH_SECRET: dev-refresh-secret-change-in-prod
+      PORT: 8080
+      NODE_ENV: development
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./src/backend/src:/app/src
+      - ./src/backend/prisma:/app/prisma
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile.test
+    command: npm run dev -- --host
+    environment:
+      VITE_API_URL: http://localhost:8080
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./src/frontend/src:/app/src
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
