@@ -57,7 +57,7 @@ interface Props {
 
 export default function KanbanBoard({ tasks, filters, onDragEnd, onEdit, onDelete }: Props) {
   const filtered = tasks.filter((t) => {
-    if (filters.assigneeId && t.assigneeId !== filters.assigneeId) return false;
+    if (filters.assigneeId && t.assignee?.id !== filters.assigneeId) return false;
     if (filters.priorities.length > 0 && !filters.priorities.includes(t.priority)) return false;
     return true;
   });

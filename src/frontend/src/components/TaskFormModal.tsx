@@ -11,7 +11,10 @@ const schema = z.object({
   priority: z.enum(['low', 'medium', 'high', 'critical']),
   status: z.enum(['todo', 'in_progress', 'review', 'done']),
   assigneeId: z.string().optional(),
-  storyPoints: z.coerce.number().int().min(1).max(13).optional().or(z.literal('')),
+  storyPoints: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.coerce.number().int().min(1, 'Min 1 point').max(13, 'Max 13 points').optional()
+  ),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -38,7 +41,7 @@ export default function TaskFormModal({ open, onClose, onSubmit, isPending, erro
       priority: task?.priority ?? 'medium',
       status: task?.status ?? 'todo',
       assigneeId: task?.assignee?.id ?? '',
-      storyPoints: task?.storyPoints ?? '',
+      storyPoints: task?.storyPoints ?? undefined,
     },
   });
 
@@ -50,7 +53,7 @@ export default function TaskFormModal({ open, onClose, onSubmit, isPending, erro
         priority: task?.priority ?? 'medium',
         status: task?.status ?? 'todo',
         assigneeId: task?.assignee?.id ?? '',
-        storyPoints: task?.storyPoints ?? '',
+        storyPoints: task?.storyPoints ?? undefined,
       });
     }
   }, [open, task, reset]);
@@ -113,7 +116,7 @@ export default function TaskFormModal({ open, onClose, onSubmit, isPending, erro
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 items-start">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
               <select

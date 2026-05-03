@@ -15,14 +15,14 @@ const PRIORITY_COLORS: Record<Task['priority'], string> = {
 };
 
 export default function TaskCard({ task, onEdit, onDelete }: Props) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task.id,
     data: { task },
   });
 
   const style = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, opacity: 0.6 }
-    : isDragging ? { opacity: 0.6 } : undefined;
+    : undefined;
 
   return (
     <div

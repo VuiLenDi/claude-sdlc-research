@@ -11,6 +11,7 @@ router.use(authenticate);
 const createSchema = z.object({
   title: z.string().min(1).max(255),
   description: z.string().max(2000).optional(),
+  status: z.enum(['todo', 'in_progress', 'review', 'done']).optional(),
   priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   assigneeId: z.string().uuid().optional(),
   storyPoints: z.number().int().min(1).max(13).optional(),
