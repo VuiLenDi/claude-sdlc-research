@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { asyncHandler, AppError } from '../utils/AppError';
 import * as projectService from '../services/projectService';
+import * as taskService from '../services/taskService';
 
 const router = Router();
 
@@ -66,6 +67,15 @@ router.delete(
   asyncHandler(async (req: AuthRequest, res: Response) => {
     await projectService.deleteProject(req.params.id, req.userId!);
     res.json({ message: 'Project deleted' });
+  })
+);
+
+router.get(
+  '/:id/members',
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const members = await taskService.getProjectMembers(req.params.id, req.userId!);
+    res.json({ data: members });
   })
 );
 
