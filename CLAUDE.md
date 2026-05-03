@@ -63,5 +63,16 @@ infrastructure/
 2. Orchestrator runs sprint planning → `docs/sprints/sprint-NN/sprint-planning.md`
 3. FE + BE agents implement assigned stories
 4. DevOps agent maintains pipeline and infra
-5. QA agent validates acceptance criteria
+5. **QA Agent — test round bắt buộc trước PR** (xem `docs/qa/qa-process.md`):
+   a. Test API + FE logic theo `docs/qa/common-bugs-checklist.md`
+   b. Ghi tất cả bugs vào `docs/qa/bug-log.md` (status = Open)
+   c. FE/BE Agent fix bugs → đổi status = Fixed
+   d. QA verify fix → đổi status = Closed
+   e. Chỉ tạo PR khi tất cả bugs = Closed, tests pass, coverage ≥ 80%
 6. Orchestrator writes sprint review + retrospective
+7. PO approve PR → merge `feature/*` → `sprint-NN` → `master`
+
+## QA Artifacts
+- `docs/qa/qa-process.md` — quy trình QA đầy đủ
+- `docs/qa/bug-log.md` — log tất cả bugs theo sprint, có status tracking
+- `docs/qa/common-bugs-checklist.md` — checklist các bug hay tái xuất hiện

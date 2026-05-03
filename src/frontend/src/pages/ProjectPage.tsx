@@ -4,22 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AppLayout from '../components/AppLayout';
 import TaskFormModal from '../components/TaskFormModal';
 import DeleteTaskDialog from '../components/DeleteTaskDialog';
+import FilterBar, { type Filters } from '../components/FilterBar';
+import KanbanBoard from '../components/KanbanBoard';
 import { taskService, type TaskPayload } from '../services/taskService';
 import type { Task } from '../types';
-
-const PRIORITY_COLORS: Record<Task['priority'], string> = {
-  low: 'bg-gray-100 text-gray-600',
-  medium: 'bg-blue-100 text-blue-700',
-  high: 'bg-orange-100 text-orange-700',
-  critical: 'bg-red-100 text-red-700',
-};
-
-const STATUS_LABELS: Record<Task['status'], string> = {
-  todo: 'To Do',
-  in_progress: 'In Progress',
-  review: 'Review',
-  done: 'Done',
-};
 
 export default function ProjectPage() {
   const { id: projectId } = useParams<{ id: string }>();
@@ -28,6 +16,7 @@ export default function ProjectPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [deleteTask, setDeleteTask] = useState<Task | null>(null);
+  const [filters, setFilters] = useState<Filters>({ assigneeId: '', priorities: [] });
 
   const { data: tasks = [], isLoading, isError } = useQuery({
     queryKey: ['tasks', projectId],
@@ -66,19 +55,35 @@ export default function ProjectPage() {
     },
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ taskId, status }: { taskId: string; status: Task['status'] }) =>
+      taskService.updateTask(projectId!, taskId, { status }),
+    onMutate: async ({ taskId, status }) => {
+      await qc.cancelQueries({ queryKey: ['tasks', projectId] });
+      const previous = qc.getQueryData<Task[]>(['tasks', projectId]);
+      qc.setQueryData<Task[]>(['tasks', projectId], (old = []) =>
+        old.map((t) => (t.id === taskId ? { ...t, status } : t))
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) qc.setQueryData(['tasks', projectId], ctx.previous);
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['tasks', projectId] });
+    },
+  });
+
   const handleCreate = (data: TaskPayload) => {
-    createMutation.mutate({
-      ...data,
-      assigneeId: data.assigneeId || undefined,
-    });
+    createMutation.mutate({ ...data, assigneeId: data.assigneeId || undefined });
   };
 
   const handleEdit = (data: TaskPayload) => {
-    editMutation.mutate({
-      id: editTask!.id,
-      ...data,
-      assigneeId: data.assigneeId || null,
-    });
+    editMutation.mutate({ id: editTask!.id, ...data, assigneeId: data.assigneeId || null });
+  };
+
+  const handleDragEnd = (taskId: string, newStatus: Task['status']) => {
+    updateStatusMutation.mutate({ taskId, status: newStatus });
   };
 
   const createError =
@@ -91,7 +96,7 @@ export default function ProjectPage() {
 
   return (
     <AppLayout>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <nav className="text-sm text-gray-500 mb-1">
             <Link to="/dashboard" className="hover:text-indigo-600">Projects</Link>
@@ -108,65 +113,19 @@ export default function ProjectPage() {
         </button>
       </div>
 
+      <FilterBar members={members} filters={filters} onChange={setFilters} />
+
       {isLoading && <p className="text-gray-500 text-sm">Loading tasks…</p>}
       {isError && <p className="text-red-600 text-sm">Failed to load tasks. Please refresh.</p>}
 
-      {!isLoading && !isError && tasks.length === 0 && (
-        <div className="text-center py-20 border-2 border-dashed border-gray-200 rounded-xl">
-          <p className="text-gray-500 mb-4">No tasks yet — create your first one</p>
-          <button
-            onClick={() => setCreateOpen(true)}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium"
-          >
-            + New Task
-          </button>
-        </div>
-      )}
-
-      {tasks.length > 0 && (
-        <div className="space-y-2">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4 flex items-center gap-4"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${PRIORITY_COLORS[task.priority]}`}>
-                    {task.priority}
-                  </span>
-                  <span className="text-xs text-gray-400">{STATUS_LABELS[task.status]}</span>
-                </div>
-                <p className="text-sm font-medium text-gray-900 truncate">{task.title}</p>
-                {task.description && (
-                  <p className="text-xs text-gray-400 mt-0.5 truncate">{task.description}</p>
-                )}
-              </div>
-
-              <div className="shrink-0 flex items-center gap-4 text-xs text-gray-400">
-                <span>{task.assignee ? task.assignee.name : 'Unassigned'}</span>
-                {task.storyPoints && <span>{task.storyPoints} pts</span>}
-              </div>
-
-              <div className="shrink-0 flex items-center gap-1">
-                <button
-                  aria-label="Edit task"
-                  onClick={() => setEditTask(task)}
-                  className="p-1 text-gray-400 hover:text-indigo-600 rounded"
-                >
-                  ✏️
-                </button>
-                <button
-                  aria-label="Delete task"
-                  onClick={() => setDeleteTask(task)}
-                  className="p-1 text-gray-400 hover:text-red-600 rounded"
-                >
-                  🗑️
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+      {!isLoading && !isError && (
+        <KanbanBoard
+          tasks={tasks}
+          filters={filters}
+          onDragEnd={handleDragEnd}
+          onEdit={setEditTask}
+          onDelete={setDeleteTask}
+        />
       )}
 
       <TaskFormModal
