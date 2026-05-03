@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
+import ProjectPage from './pages/ProjectPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,9 +23,6 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : <>{children}</>;
 }
 
-const ProjectPage = () => (
-  <div className="p-8 text-gray-700">Project detail — Sprint 03</div>
-);
 const NotFoundPage = () => (
   <div className="p-8 text-gray-700">404 — Page not found</div>
 );
