@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 
 import authRoutes from './routes/auth';
 import projectRoutes from './routes/projects';
+import taskRoutes from './routes/tasks';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -30,6 +31,7 @@ const authLimiter = rateLimit({
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/projects/:projectId/tasks', taskRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
