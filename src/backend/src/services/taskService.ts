@@ -63,6 +63,7 @@ export async function createTask(
   data: {
     title: string;
     description?: string;
+    status?: TaskStatus;
     priority?: TaskPriority;
     assigneeId?: string;
     storyPoints?: number;
@@ -76,6 +77,7 @@ export async function createTask(
       reporterId,
       title: data.title,
       description: data.description,
+      status: data.status,
       priority: data.priority ?? 'medium',
       assigneeId: data.assigneeId,
       storyPoints: data.storyPoints,

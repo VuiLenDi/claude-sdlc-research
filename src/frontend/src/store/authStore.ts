@@ -31,7 +31,11 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'taskflow-auth',
-      partialize: (state) => ({ user: state.user }),
+      partialize: (state) => ({
+        user: state.user,
+        accessToken: state.accessToken,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );
