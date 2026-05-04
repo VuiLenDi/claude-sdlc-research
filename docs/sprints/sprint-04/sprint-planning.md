@@ -29,9 +29,9 @@ Status: Active
 
 | ID | Story | Assignee | Points | Status |
 |----|-------|---------|--------|--------|
-| US-014 | Kanban columns by status | FE Agent | 8 | To Do |
-| US-015 | Drag-and-drop between columns | FE Agent | 8 | To Do |
-| US-016 | Filter by assignee + priority | FE Agent | 5 | To Do |
+| US-014 | Kanban columns by status | FE Agent | 8 | ✅ Done |
+| US-015 | Drag-and-drop between columns | FE Agent | 8 | ✅ Done |
+| US-016 | Filter by assignee + priority | FE Agent | 5 | ✅ Done |
 | **Total** | | | **21** | |
 
 ---
@@ -68,9 +68,11 @@ Status: Active
 ---
 
 ## Definition of Done
-- [ ] 4 columns render with correct tasks
-- [ ] Drag task → column → status updates via API
-- [ ] Filter by assignee and/or priority works
-- [ ] FE tests ≥80% coverage, all pass
-- [ ] `docker compose up` → Kanban board functional
-- [ ] Branch `feature/kanban-board` → PR to `sprint-04`
+- [x] 4 columns render with correct tasks
+- [x] Drag task → column → status updates via API
+- [x] Filter by assignee and/or priority works
+- [x] FE tests ≥80% coverage, all pass (54/54, 98.81%)
+- [x] BE tests ≥80% coverage, all pass (62/62, 97.76%)
+- [x] QA round complete — 6 bugs found, 6 closed
+- [x] `docker compose up` → Kanban board functional
+- [x] Branch `feature/kanban-board` → PR #3 to `sprint-04`
