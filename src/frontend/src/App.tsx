@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
 import ProjectPage from './pages/ProjectPage';
+import AdminPage from './pages/AdminPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,6 +17,13 @@ const queryClient = new QueryClient({
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+}
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user } = useAuthStore((s) => ({ isAuthenticated: s.isAuthenticated, user: s.user }));
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!user?.isAdmin) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
@@ -46,6 +54,10 @@ export default function App() {
           <Route
             path="/projects/:id"
             element={<ProtectedRoute><ProjectPage /></ProtectedRoute>}
+          />
+          <Route
+            path="/admin"
+            element={<AdminRoute><AdminPage /></AdminRoute>}
           />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

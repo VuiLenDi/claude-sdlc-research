@@ -16,6 +16,8 @@ const createSchema = z.object({
   assigneeId: z.string().uuid().optional(),
   storyPoints: z.number().int().min(1).max(13).optional(),
   dueDate: z.string().datetime().optional(),
+  startDate: z.string().date().optional(),
+  endDate: z.string().date().optional(),
 });
 
 const updateSchema = z.object({
@@ -26,6 +28,8 @@ const updateSchema = z.object({
   assigneeId: z.string().uuid().nullable().optional(),
   storyPoints: z.number().int().min(1).max(13).nullable().optional(),
   dueDate: z.string().datetime().nullable().optional(),
+  startDate: z.string().date().nullable().optional(),
+  endDate: z.string().date().nullable().optional(),
 });
 
 router.post(
@@ -33,10 +37,12 @@ router.post(
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const body = createSchema.safeParse(req.body);
     if (!body.success) throw new AppError(body.error.errors[0].message, 400, 'VALIDATION_ERROR');
-    const { dueDate, ...rest } = body.data;
+    const { dueDate, startDate, endDate, ...rest } = body.data;
     const task = await createTask((req.params as { projectId: string }).projectId, req.userId!, {
       ...rest,
       dueDate: dueDate ? new Date(dueDate) : undefined,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
     });
     res.status(201).json({ data: task });
   })
@@ -67,11 +73,13 @@ router.put(
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const body = updateSchema.safeParse(req.body);
     if (!body.success) throw new AppError(body.error.errors[0].message, 400, 'VALIDATION_ERROR');
-    const { dueDate, ...rest } = body.data;
+    const { dueDate, startDate, endDate, ...rest } = body.data;
     const p = req.params as { projectId: string; taskId: string };
     const task = await updateTask(p.projectId, p.taskId, req.userId!, {
       ...rest,
       dueDate: dueDate === undefined ? undefined : dueDate ? new Date(dueDate) : null,
+      startDate: startDate === undefined ? undefined : startDate ? new Date(startDate) : null,
+      endDate: endDate === undefined ? undefined : endDate ? new Date(endDate) : null,
     });
     res.json({ data: task });
   })

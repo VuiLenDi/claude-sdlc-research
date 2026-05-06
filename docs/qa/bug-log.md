@@ -2,7 +2,7 @@
 
 ```
 Role:   QA Agent
-Updated: 2026-05-04
+Updated: 2026-05-06
 ```
 
 ---
@@ -11,6 +11,14 @@ Updated: 2026-05-04
 
 - **Status:** `Open` → `Fixed` → `Verified` → `Closed`
 - **Severity:** 🔴 Critical | 🟠 High | 🟡 Medium | ⚪ Low
+
+---
+
+## Sprint 05 — User Admin + Task Dates + Notifications Foundation
+
+| ID | Severity | AC | Description | File | Status |
+|----|----------|----|-------------|------|--------|
+| BUG-S05-01 | 🔴 Critical | US-027 AC1, AC5 | `startDate`/`endDate` validated với `z.string().datetime()` nhưng FE gửi `YYYY-MM-DD` từ `<input type="date">` → API trả 400 VALIDATION_ERROR khi user đặt ngày | `routes/tasks.ts:19-20,31-32` | ✅ Closed |
 
 ---
 
@@ -41,3 +49,4 @@ Updated: 2026-05-04
 |--------|-------|----------|------|--------|-----|--------|
 | 03 | 1 | 0 | 0 | 1 | 0 | 1 |
 | 04 | 6 | 2 | 1 | 2 | 1 | 6 |
+| 05 | 1 | 1 | 0 | 0 | 0 | 1 |

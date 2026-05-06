@@ -74,12 +74,25 @@ export default function ProjectPage() {
     },
   });
 
+  const toIso = (d?: string | null) => (d ? new Date(d).toISOString() : undefined);
+
   const handleCreate = (data: TaskPayload) => {
-    createMutation.mutate({ ...data, assigneeId: data.assigneeId || undefined });
+    createMutation.mutate({
+      ...data,
+      assigneeId: data.assigneeId || undefined,
+      startDate: toIso(data.startDate),
+      endDate: toIso(data.endDate),
+    });
   };
 
   const handleEdit = (data: TaskPayload) => {
-    editMutation.mutate({ id: editTask!.id, ...data, assigneeId: data.assigneeId || null });
+    editMutation.mutate({
+      id: editTask!.id,
+      ...data,
+      assigneeId: data.assigneeId || null,
+      startDate: data.startDate ? toIso(data.startDate) : null,
+      endDate: data.endDate ? toIso(data.endDate) : null,
+    });
   };
 
   const handleDragEnd = (taskId: string, newStatus: Task['status']) => {

@@ -14,6 +14,8 @@ export interface TaskPayload {
   assigneeId?: string | null;
   storyPoints?: number | null;
   dueDate?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
   status?: Task['status'];
 }
 

@@ -9,7 +9,9 @@ import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth';
 import projectRoutes from './routes/projects';
 import taskRoutes from './routes/tasks';
+import adminRoutes from './routes/admin';
 import { errorHandler } from './middleware/errorHandler';
+import { startCronJobs } from './services/notificationService';
 
 const app = express();
 
@@ -32,6 +34,7 @@ const authLimiter = rateLimit({
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/projects/:projectId/tasks', taskRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
@@ -42,6 +45,7 @@ if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`TaskFlow API running on :${PORT}`);
   });
+  startCronJobs();
 }
 
 export default app;

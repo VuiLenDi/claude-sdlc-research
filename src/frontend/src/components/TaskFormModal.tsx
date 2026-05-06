@@ -15,6 +15,8 @@ const schema = z.object({
     (v) => (v === '' ? undefined : v),
     z.coerce.number().int().min(1, 'Min 1 point').max(13, 'Max 13 points').optional()
   ),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -42,6 +44,8 @@ export default function TaskFormModal({ open, onClose, onSubmit, isPending, erro
       status: task?.status ?? 'todo',
       assigneeId: task?.assignee?.id ?? '',
       storyPoints: task?.storyPoints ?? undefined,
+      startDate: task?.startDate ? task.startDate.slice(0, 10) : '',
+      endDate: task?.endDate ? task.endDate.slice(0, 10) : '',
     },
   });
 
@@ -54,6 +58,8 @@ export default function TaskFormModal({ open, onClose, onSubmit, isPending, erro
         status: task?.status ?? 'todo',
         assigneeId: task?.assignee?.id ?? '',
         storyPoints: task?.storyPoints ?? undefined,
+        startDate: task?.startDate ? task.startDate.slice(0, 10) : '',
+        endDate: task?.endDate ? task.endDate.slice(0, 10) : '',
       });
     }
   }, [open, task, reset]);
@@ -141,6 +147,27 @@ export default function TaskFormModal({ open, onClose, onSubmit, isPending, erro
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               {errors.storyPoints && <p className="mt-1 text-sm text-red-600">{errors.storyPoints.message}</p>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 items-start">
+            <div>
+              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+              <input
+                id="startDate"
+                {...register('startDate')}
+                type="date"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+              <input
+                id="endDate"
+                {...register('endDate')}
+                type="date"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           </div>
 

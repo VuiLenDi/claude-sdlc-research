@@ -7,8 +7,8 @@ import { AppError } from '../utils/AppError';
 const ACCESS_TTL = '15m';
 const REFRESH_TTL_DAYS = 7;
 
-export function generateAccessToken(userId: string): string {
-  return jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: ACCESS_TTL });
+export function generateAccessToken(userId: string, isAdmin = false): string {
+  return jwt.sign({ userId, isAdmin }, process.env.JWT_SECRET!, { expiresIn: ACCESS_TTL });
 }
 
 export async function generateRefreshToken(userId: string): Promise<string> {
@@ -33,10 +33,10 @@ export async function register(name: string, email: string, password: string) {
   const hashed = await bcrypt.hash(password, 12);
   const user = await prisma.user.create({
     data: { name, email, password: hashed },
-    select: { id: true, email: true, name: true, avatarUrl: true, createdAt: true },
+    select: { id: true, email: true, name: true, avatarUrl: true, isAdmin: true, isActive: true, createdAt: true },
   });
 
-  const accessToken = generateAccessToken(user.id);
+  const accessToken = generateAccessToken(user.id, user.isAdmin);
   const refreshToken = await generateRefreshToken(user.id);
   return { user, accessToken, refreshToken };
 }
@@ -47,13 +47,17 @@ export async function login(email: string, password: string) {
     throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
   }
 
+  if (!user.isActive) {
+    throw new AppError('Account is disabled', 401, 'ACCOUNT_DISABLED');
+  }
+
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) {
     throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
   }
 
   const { password: _, ...safeUser } = user;
-  const accessToken = generateAccessToken(user.id);
+  const accessToken = generateAccessToken(user.id, user.isAdmin);
   const refreshToken = await generateRefreshToken(user.id);
   return { user: safeUser, accessToken, refreshToken };
 }
@@ -71,7 +75,8 @@ export async function refresh(token: string) {
     throw new AppError('Refresh token expired', 401, 'TOKEN_EXPIRED');
   }
 
-  const accessToken = generateAccessToken(payload.userId);
+  const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+  const accessToken = generateAccessToken(payload.userId, user?.isAdmin ?? false);
   return { accessToken };
 }
 
@@ -82,7 +87,7 @@ export async function logout(refreshToken: string) {
 export async function getUser(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, name: true, avatarUrl: true, createdAt: true },
+    select: { id: true, email: true, name: true, avatarUrl: true, isAdmin: true, isActive: true, createdAt: true },
   });
   if (!user) throw new AppError('User not found', 404, 'NOT_FOUND');
   return user;

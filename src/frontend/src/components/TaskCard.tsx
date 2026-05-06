@@ -14,6 +14,10 @@ const PRIORITY_COLORS: Record<Task['priority'], string> = {
   critical: 'bg-red-100 text-red-700',
 };
 
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+}
+
 export default function TaskCard({ task, onEdit, onDelete }: Props) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task.id,
@@ -23,6 +27,10 @@ export default function TaskCard({ task, onEdit, onDelete }: Props) {
   const style = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, opacity: 0.6 }
     : undefined;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isOverdue = task.endDate ? new Date(task.endDate) < today : false;
 
   return (
     <div
@@ -42,6 +50,13 @@ export default function TaskCard({ task, onEdit, onDelete }: Props) {
         </div>
         <p className="text-sm font-medium text-gray-900 my-1">{task.title}</p>
         <p className="text-xs text-gray-400">{task.assignee?.name ?? 'Unassigned'}</p>
+        {(task.startDate || task.endDate) && (
+          <p className={`text-xs mt-1 ${isOverdue ? 'text-red-600 font-medium' : 'text-gray-400'}`}>
+            {task.startDate ? formatDate(task.startDate) : '—'}
+            {' → '}
+            {task.endDate ? formatDate(task.endDate) : '—'}
+          </p>
+        )}
       </div>
       <div className="flex items-center justify-end gap-1 mt-2">
         <button

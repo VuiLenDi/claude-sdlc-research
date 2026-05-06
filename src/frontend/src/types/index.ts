@@ -3,6 +3,8 @@ export interface User {
   email: string;
   name: string;
   avatarUrl?: string;
+  isAdmin?: boolean;
+  isActive?: boolean;
   createdAt: string;
 }
 
@@ -37,8 +39,23 @@ export interface Task {
   storyPoints?: number;
   position: number;
   dueDate?: string;
+  startDate?: string;
+  endDate?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export type NotificationType = 'task_start' | 'task_due';
+
+export interface Notification {
+  id: string;
+  userId: string;
+  taskId: string;
+  type: NotificationType;
+  message: string;
+  isRead: boolean;
+  notifDate: string;
+  createdAt: string;
 }
 
 export interface Sprint {

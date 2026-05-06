@@ -17,6 +17,8 @@ function formatTask(t: {
   priority: TaskPriority;
   storyPoints: number | null;
   dueDate: Date | null;
+  startDate: Date | null;
+  endDate: Date | null;
   position: number;
   createdAt: Date;
   updatedAt: Date;
@@ -33,6 +35,8 @@ function formatTask(t: {
     priority: t.priority,
     storyPoints: t.storyPoints,
     dueDate: t.dueDate,
+    startDate: t.startDate,
+    endDate: t.endDate,
     position: t.position,
     assignee: t.assignee,
     reporter: t.reporter,
@@ -68,6 +72,8 @@ export async function createTask(
     assigneeId?: string;
     storyPoints?: number;
     dueDate?: Date;
+    startDate?: Date;
+    endDate?: Date;
   }
 ) {
   await assertMember(projectId, reporterId);
@@ -82,6 +88,8 @@ export async function createTask(
       assigneeId: data.assigneeId,
       storyPoints: data.storyPoints,
       dueDate: data.dueDate,
+      startDate: data.startDate,
+      endDate: data.endDate,
     },
     include: taskInclude,
   });
@@ -120,6 +128,8 @@ export async function updateTask(
     assigneeId?: string | null;
     storyPoints?: number | null;
     dueDate?: Date | null;
+    startDate?: Date | null;
+    endDate?: Date | null;
   }
 ) {
   await assertMember(projectId, userId);

@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'sprint-*', 'feat/*', 'fix/*']
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-ci:
+    name: Backend — Lint, Type-check, Test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: taskflow
+          POSTGRES_PASSWORD: taskflow
+          POSTGRES_DB: taskflow_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: src/backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: src/backend/package-lock.json
+
+      - run: npm ci
+
+      - name: Type-check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run migrations (test DB)
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://taskflow:taskflow@localhost:5432/taskflow_test
+
+      - name: Run tests
+        run: npm test -- --coverage
+        env:
+          DATABASE_URL: postgresql://taskflow:taskflow@localhost:5432/taskflow_test
+          JWT_SECRET: ci-jwt-secret-32-chars-minimum-here
+          JWT_REFRESH_SECRET: ci-refresh-secret-32-chars-minimum
+          NODE_ENV: test
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: src/backend/coverage/
+
+  frontend-ci:
+    name: Frontend — Lint, Type-check, Test
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: src/frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - run: npm ci
+
+      - name: Type-check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_API_URL: https://api.taskflow.example.com
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: src/frontend/coverage/
+
+  docker-build:
+    name: Docker Build (dry run)
+    runs-on: ubuntu-latest
+    needs: [backend-ci, frontend-ci]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t taskflow-backend:ci ./src/backend
+
+      - name: Build frontend image
+        run: docker build --build-arg VITE_API_URL=https://api.taskflow.example.com -t taskflow-frontend:ci ./src/frontend
