@@ -110,6 +110,16 @@ describe('POST /api/projects/:id/tasks', () => {
     expect(res.status).toBe(201);
   });
 
+  it('creates a task with startDate and endDate (YYYY-MM-DD)', async () => {
+    const res = await request(app)
+      .post(`/api/projects/${projectId}/tasks`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ title: 'Dated Task', startDate: '2026-06-01', endDate: '2026-06-15' });
+    expect(res.status).toBe(201);
+    expect(res.body.data.startDate).toBeTruthy();
+    expect(res.body.data.endDate).toBeTruthy();
+  });
+
   it('returns 400 for empty title', async () => {
     const res = await request(app)
       .post(`/api/projects/${projectId}/tasks`)
@@ -248,6 +258,26 @@ describe('PUT /api/projects/:id/tasks/:taskId', () => {
       .send({ dueDate: '2026-12-31T00:00:00.000Z' });
     expect(res.status).toBe(200);
     expect(res.body.data.dueDate).toBeTruthy();
+  });
+
+  it('sets startDate and endDate (YYYY-MM-DD) on update', async () => {
+    const res = await request(app)
+      .put(`/api/projects/${projectId}/tasks/${taskId}`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ startDate: '2026-07-01', endDate: '2026-07-31' });
+    expect(res.status).toBe(200);
+    expect(res.body.data.startDate).toBeTruthy();
+    expect(res.body.data.endDate).toBeTruthy();
+  });
+
+  it('clears startDate and endDate when null is passed', async () => {
+    const res = await request(app)
+      .put(`/api/projects/${projectId}/tasks/${taskId}`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ startDate: null, endDate: null });
+    expect(res.status).toBe(200);
+    expect(res.body.data.startDate).toBeNull();
+    expect(res.body.data.endDate).toBeNull();
   });
 
   it('returns 404 for outsider', async () => {

@@ -19,6 +19,8 @@ Updated: 2026-05-06
 | ID | Severity | AC | Description | File | Status |
 |----|----------|----|-------------|------|--------|
 | BUG-S05-01 | 🔴 Critical | US-027 AC1, AC5 | `startDate`/`endDate` validated với `z.string().datetime()` nhưng FE gửi `YYYY-MM-DD` từ `<input type="date">` → API trả 400 VALIDATION_ERROR khi user đặt ngày | `routes/tasks.ts:19-20,31-32` | ✅ Closed |
+| BUG-S05-02 | 🟠 High | — | `AdminPage.test.tsx` fail: React Query v5.50+ pass mutation context object làm arg thứ 2 vào `mutationFn`, test matcher chỉ expect 1 arg | `AdminPage.test.tsx:73` | ✅ Closed |
+| BUG-S05-03 | 🟠 High | — | BE branch coverage 72.85% < 80%: thiếu test cho date branches (`tasks.ts:43-82`) và `notificationService.ts:startCronJobs` | `tasks.int.test.ts`, `notificationService.ts:40-47` | ✅ Closed |
 
 ---
 
@@ -49,4 +51,4 @@ Updated: 2026-05-06
 |--------|-------|----------|------|--------|-----|--------|
 | 03 | 1 | 0 | 0 | 1 | 0 | 1 |
 | 04 | 6 | 2 | 1 | 2 | 1 | 6 |
-| 05 | 1 | 1 | 0 | 0 | 0 | 1 |
+| 05 | 3 | 1 | 2 | 0 | 0 | 3 |

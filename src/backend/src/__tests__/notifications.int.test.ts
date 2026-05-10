@@ -1,5 +1,5 @@
 import { prisma } from '../models/prisma';
-import { createStartDateNotifications } from '../services/notificationService';
+import { createStartDateNotifications, startCronJobs } from '../services/notificationService';
 
 const NS = '@notif-test.taskflow';
 
@@ -103,5 +103,13 @@ describe('createStartDateNotifications', () => {
     expect(after).toBe(before);
 
     await prisma.task.delete({ where: { id: task.id } });
+  });
+});
+
+// ─── startCronJobs unit (mocked cron) ────────────────────────────────────────
+
+describe('startCronJobs', () => {
+  it('registers the daily cron job without throwing', () => {
+    expect(() => startCronJobs()).not.toThrow();
   });
 });

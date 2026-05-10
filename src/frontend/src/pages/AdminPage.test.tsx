@@ -76,7 +76,8 @@ describe('AdminPage', () => {
 
     await waitFor(() =>
       expect(adminService.createUser).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'New User', email: 'new@example.com' })
+        expect.objectContaining({ name: 'New User', email: 'new@example.com' }),
+        expect.anything()
       )
     );
   });
